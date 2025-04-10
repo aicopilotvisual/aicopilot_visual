@@ -1,12 +1,17 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 
 export function useNavigationEvents() {
   const [isNavigating, setIsNavigating] = useState(false);
   const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const rawSearchParams = useSearchParams();
+  
+  // Properly memoize the searchParams to avoid recreating on each render
+  const searchParams = useMemo(() => {
+    return rawSearchParams || new URLSearchParams();
+  }, [rawSearchParams]);
   
   // Store the current pathname and search params
   useEffect(() => {

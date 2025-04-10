@@ -6,6 +6,7 @@ import { Providers } from "@/components/providers";
 import { ClerkProvider } from "@clerk/nextjs";
 import PageLoader from "@/components/PageLoader";
 import NavigationProgressBar from "@/components/NavigationProgressBar";
+import { Suspense } from "react";
 
 const nunito = Nunito({
   variable: "--font-nunito",
@@ -17,6 +18,10 @@ const ptSans = PT_Sans({
   subsets: ["latin"],
   weight: ["400", "700"],
 });
+
+// Fallback components for Suspense
+const NavigationProgressBarFallback = () => null;
+const PageLoaderFallback = () => null;
 
 export const metadata: Metadata = {
   title: "AI Copilot - Automation Made Visual",
@@ -69,8 +74,12 @@ export default function RootLayout({
         <body className={`${nunito.variable} ${ptSans.variable} antialiased relative`} suppressHydrationWarning>
           <div className="texture"/>
           <Providers>
-            <NavigationProgressBar />
-            <PageLoader />
+            <Suspense fallback={<NavigationProgressBarFallback />}>
+              <NavigationProgressBar />
+            </Suspense>
+            <Suspense fallback={<PageLoaderFallback />}>
+              <PageLoader />
+            </Suspense>
             {children}
           </Providers>
         </body>
