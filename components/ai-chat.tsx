@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Send, Bot, User, Loader2, AlertCircle, Paperclip, Sparkles, Lock } from "lucide-react";
+import { Send, Bot, User, Loader2, AlertCircle, Paperclip, Sparkles, Lock, Mic, MicOff } from "lucide-react";
 import { AutomationStep } from "@/lib/types";
 import { analyzeAutomation } from "@/lib/openai";
 import { v4 as uuidv4 } from 'uuid';
@@ -30,9 +30,13 @@ export default function AIChat({ onUpdateSteps }: AIChatProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [userMessageCount, setUserMessageCount] = useState(0);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
   const { toast } = useToast();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
   const { userId, isSignedIn } = useAuth();
   const { user } = useUser();
   
@@ -54,6 +58,114 @@ export default function AIChat({ onUpdateSteps }: AIChatProps) {
   }, [userId, userMessageCount]);
 
   const isMessageLimitReached = userMessageCount >= MAX_MESSAGES_PER_USER;
+
+  // Start recording audio
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        await transcribeAudio(audioBlob);
+        
+        // Stop all tracks to release the microphone
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+      
+      toast({
+        title: "Recording started",
+        description: "Speak clearly to describe your automation idea.",
+        duration: 3000,
+        className: "bg-amber-50",
+      });
+    } catch (error) {
+      console.error("Error accessing microphone:", error);
+      toast({
+        title: "Microphone Error",
+        description: "Could not access your microphone. Please check permissions.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Stop recording audio
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+      setIsTranscribing(true);
+    }
+  };
+
+  // Toggle recording state
+  const toggleRecording = () => {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  };
+
+  // Transcribe audio using OpenAI API
+  const transcribeAudio = async (audioBlob: Blob) => {
+    try {
+      // Create a file from the audio blob
+      const file = new File([audioBlob], "audio.webm", { type: "audio/webm" });
+      
+      // Create form data
+      const formData = new FormData();
+      formData.append("audio", file);
+      
+      // Send to our API route
+      const response = await fetch("/api/speech-to-text", {
+        method: "POST",
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error(`API responded with status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.text) {
+        // Append transcribed text to input field
+        setInput((prev) => {
+          const newInput = prev ? `${prev} ${data.text}` : data.text;
+          return newInput;
+        });
+        
+        toast({
+          title: "Transcription complete",
+          description: "Your speech has been converted to text.",
+          duration: 3000,
+        });
+      } else if (data.error) {
+        throw new Error(data.error);
+      }
+    } catch (error) {
+      console.error("Error transcribing audio:", error);
+      toast({
+        title: "Transcription Error",
+        description: "Failed to convert speech to text. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsTranscribing(false);
+    }
+  };
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -117,7 +229,7 @@ export default function AIChat({ onUpdateSteps }: AIChatProps) {
           ${step.description}
           Complexity: ${step.complexity || 'medium'}
           ${toolsText}`;
-              }).join('\n');
+      }).join('\n');
 
       // Format platforms for display
       const platformsText = analysis.recommendations.platforms.length > 0
@@ -141,7 +253,7 @@ export default function AIChat({ onUpdateSteps }: AIChatProps) {
 
           Key Considerations:
           ${considerationsText}`
-                };
+      };
 
       setMessages(prev => [...prev, assistantMessage]);
       onUpdateSteps(analysis.steps);
@@ -179,13 +291,6 @@ export default function AIChat({ onUpdateSteps }: AIChatProps) {
         inputRef.current.focus();
       }
     }
-  };
-
-  const handleAttachmentClick = () => {
-    toast({
-      title: "Feature coming soon",
-      description: "File attachment functionality will be available in a future update.",
-    });
   };
 
   // Handle premium upgrade click
@@ -306,33 +411,60 @@ export default function AIChat({ onUpdateSteps }: AIChatProps) {
       
       <div className="p-5 border-t bg-card/90 backdrop-blur-md relative z-10">
         <div className="flex gap-3 items-center">
+          {/* Microphone button */}
           <Button 
             variant="outline" 
             size="icon" 
-            className="flex-shrink-0 h-11 w-11 rounded-full border-2 hover:bg-primary/10 hover:text-primary transition-all duration-300"
-            onClick={handleAttachmentClick}
-            disabled={isLoading || isMessageLimitReached || !isSignedIn}
+            className={`
+              flex-shrink-0 h-11 w-11 rounded-full border-2 transition-all duration-300
+              ${isRecording || isTranscribing
+                ? "bg-red-500/20 hover:bg-red-500/30 text-red-600 border-red-500" 
+                : "hover:bg-primary/10 hover:text-primary border-primary/20"}
+            `}
+            onClick={toggleRecording}
+            disabled={isLoading || isMessageLimitReached || !isSignedIn || isTranscribing}
           >
-            <Paperclip className="w-5 h-5" />
+            {isRecording ? (
+              <MicOff className="w-5 h-5 animate-pulse" />
+            ) : isTranscribing ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Mic className="w-5 h-5" />
+            )}
           </Button>
+          
           <Input
-            placeholder={isMessageLimitReached ? "Message limit reached" : "Describe your automation idea..."}
+            placeholder={
+              isRecording 
+                ? "Recording... Click the microphone icon to stop" 
+                : isTranscribing
+                ? "Transcribing your audio..."
+                : isMessageLimitReached 
+                ? "Message limit reached" 
+                : "Describe your automation idea or click the mic to speak..."
+            }
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
-            disabled={isLoading || isMessageLimitReached || !isSignedIn}
+            disabled={isLoading || isMessageLimitReached || !isSignedIn || isRecording || isTranscribing}
             ref={inputRef}
-            className="min-h-11 text-sm py-3 rounded-full px-5 border-2 border-primary/20 focus-visible:ring-primary focus-visible:border-primary/50 shadow-sm transition-all duration-300"
+            className={`
+              min-h-11 text-sm py-3 rounded-full px-5 border-2 
+              focus-visible:ring-primary focus-visible:border-primary/50 
+              shadow-sm transition-all duration-300
+              ${isRecording || isTranscribing ? "border-red-500/50 bg-red-50/50" : "border-primary/20"}
+            `}
           />
+          
           <Button 
             onClick={handleSend} 
-            disabled={isLoading || !input.trim() || isMessageLimitReached || !isSignedIn} 
+            disabled={isLoading || !input.trim() || isMessageLimitReached || !isSignedIn || isRecording || isTranscribing} 
             className={`
               flex-shrink-0 h-11 w-11 rounded-full
               transition-all duration-300
               ${(input.trim() && !isMessageLimitReached) ? "bg-primary hover:bg-primary/90" : "bg-secondary hover:bg-secondary/90"}
               shadow-md hover:shadow-lg
-              ${isMessageLimitReached ? "opacity-50 cursor-not-allowed" : ""}
+              ${isMessageLimitReached || isRecording || isTranscribing ? "opacity-50 cursor-not-allowed" : ""}
             `}
           >
             {isLoading ? 
@@ -349,7 +481,7 @@ export default function AIChat({ onUpdateSteps }: AIChatProps) {
               className="text-xs bg-primary/5 hover:bg-primary/10 border-primary/20 text-primary"
               onClick={handlePremiumClick}
             >
-              Upgrade to Premium
+              Limit Reached!
             </Button>
           </div>
         )}

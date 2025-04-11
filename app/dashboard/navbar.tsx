@@ -28,35 +28,43 @@ export default function Navbar({ hasContent, onNewFlow, automationSteps }: Navba
     window.open("https://tally.so/r/3jzXG1", "_blank");
   };
 
+  //share function
   const handleShareClick = () => {
     if (!hasContent) {
       toast({
         title: "Nothing to share",
         description: "Create a workflow first before sharing.",
+        className: "bg-amber-50",
       });
       return;
     }
     
+    // Always use the specific URL instead of current location
+    const shareUrl = "https://mechevo-io-613v.vercel.app/";
+    
     if (navigator.share) {
       navigator.share({
-        title: 'AI Copilot Workflow',
+        title: 'Mechevo Copilot Workflow',
         text: 'Check out this automation workflow I created!',
-        url: window.location.href,
+        url: shareUrl,
       })
       .catch((error) => toast({
         title: "Sharing failed",
         description: "Could not share this workflow.",
+        className: "bg-amber-50",
       }));
     } else {
       // Fallback for browsers that don't support the Web Share API
-      navigator.clipboard.writeText(window.location.href)
+      navigator.clipboard.writeText(shareUrl)
         .then(() => toast({
           title: "Link copied!",
           description: "Workflow URL copied to clipboard.",
+          className: "bg-amber-50",
         }))
         .catch(() => toast({
           title: "Copy failed",
           description: "Could not copy the URL to clipboard.",
+          className: "bg-amber-50",
         }));
     }
   };
