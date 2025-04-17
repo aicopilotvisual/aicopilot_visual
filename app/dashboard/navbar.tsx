@@ -28,18 +28,16 @@ export default function Navbar({ hasContent, onNewFlow, automationSteps }: Navba
     window.open("https://tally.so/r/3jzXG1", "_blank");
   };
 
-  //share function
   const handleShareClick = () => {
     if (!hasContent) {
       toast({
         title: "Nothing to share",
         description: "Create a workflow first before sharing.",
-        className: "bg-amber-50",
+        className: "bg-blue-50",
       });
       return;
     }
     
-    // Always use the specific URL instead of current location
     const shareUrl = "https://mechevo-io-613v.vercel.app/";
     
     if (navigator.share) {
@@ -51,20 +49,19 @@ export default function Navbar({ hasContent, onNewFlow, automationSteps }: Navba
       .catch((error) => toast({
         title: "Sharing failed",
         description: "Could not share this workflow.",
-        className: "bg-amber-50",
+        className: "bg-blue-50",
       }));
     } else {
-      // Fallback for browsers that don't support the Web Share API
       navigator.clipboard.writeText(shareUrl)
         .then(() => toast({
           title: "Link copied!",
           description: "Workflow URL copied to clipboard.",
-          className: "bg-amber-50",
+          className: "bg-blue-50",
         }))
         .catch(() => toast({
           title: "Copy failed",
           description: "Could not copy the URL to clipboard.",
-          className: "bg-amber-50",
+          className: "bg-blue-50",
         }));
     }
   };
@@ -74,7 +71,8 @@ export default function Navbar({ hasContent, onNewFlow, automationSteps }: Navba
       toast({
         title: "Nothing to export",
         description: "Create a workflow first before exporting.",
-        variant: "destructive"
+        variant: "destructive",
+        className: "bg-blue-50"
       });
       return;
     }
@@ -84,14 +82,13 @@ export default function Navbar({ hasContent, onNewFlow, automationSteps }: Navba
       name: "AI Copilot Workflow",
       flow: automationSteps.map((step, index) => {
         return {
-          id: index + 1, // Make uses numeric IDs starting from 1
+          id: index + 1,
           module: step.module || "custom:Module",
           version: step.version || 1,
           parameters: step.parameters || {},
           mapper: step.mapper || {},
           metadata: {
             designer: {
-              // Use existing designer metadata if available, otherwise set default positioning
               x: step.metadata?.designer?.x !== undefined ? step.metadata.designer.x : index * 300,
               y: step.metadata?.designer?.y !== undefined ? step.metadata.designer.y : 0,
               ...(step.metadata?.designer || {})
@@ -136,6 +133,7 @@ export default function Navbar({ hasContent, onNewFlow, automationSteps }: Navba
     toast({
       title: "Export successful",
       description: "Your workflow has been exported as JSON compatible with Make.",
+      className: "bg-blue-50"
     });
   };
 
@@ -145,7 +143,7 @@ export default function Navbar({ hasContent, onNewFlow, automationSteps }: Navba
         title: "Nothing to export",
         description: "Create a workflow first before exporting.",
         variant: "destructive",
-        className:"bg-amber-50"
+        className: "bg-blue-50"
       });
       return;
     }
@@ -201,15 +199,18 @@ export default function Navbar({ hasContent, onNewFlow, automationSteps }: Navba
     toast({
       title: "Export successful",
       description: "Your workflow has been exported as a document.",
+      className: "bg-blue-50"
     });
   };
 
   return (
-    <nav className="border-b bg-background/50 backdrop-blur-lg w-full z-50">
+    <nav className="border-b bg-white/10 backdrop-blur-xl w-full z-50 transition-all duration-300 shadow-lg hover:shadow-blue-200/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <Bot className="h-8 w-8 text-primary animate-pulse" />
-          <h1 className="text-2xl font-bold bg-clip-text bg-gradient-to-r from-primary to-purple-600">
+          <div className="bg-[#253551]/10 p-2 rounded-full backdrop-blur-md border border-white/30 shadow-inner animate-pulse">
+            <Bot className="h-8 w-8 text-[#253551] animate-pulse" />
+          </div>
+          <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#253551] to-blue-400">
             Mechevo Copilot
           </h1>
         </div>
@@ -218,23 +219,16 @@ export default function Navbar({ hasContent, onNewFlow, automationSteps }: Navba
             variant="ghost" 
             size="sm" 
             onClick={() => router.push("/")}
-            className="hidden sm:flex"
+            className="hidden sm:flex bg-white/10 backdrop-blur-sm border border-white/30 text-[#253551] hover:bg-[#253551]/10 transition-all duration-300 transform hover:scale-105"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Home
           </Button>
-          {/* <Button 
-            variant="outline" 
-            size="icon" 
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")} 
-            aria-label="Toggle theme"
-          >
-            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          </Button> */}
+          
           <Button 
             variant="outline" 
             size="sm" 
-            className="hidden sm:flex" 
+            className="hidden sm:flex bg-white/20 backdrop-blur-sm border border-white/30 text-[#253551] hover:bg-[#253551]/10 transition-all duration-300 transform hover:scale-105" 
             onClick={handleShareClick}
           >
             <Share2 className="h-4 w-4 mr-2" />
@@ -246,25 +240,28 @@ export default function Navbar({ hasContent, onNewFlow, automationSteps }: Navba
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="hidden sm:flex"
+                className="hidden sm:flex bg-white/20 backdrop-blur-sm border border-white/30 text-[#253551] hover:bg-[#253551]/10 transition-all duration-300 transform hover:scale-105"
               >
                 <Download className="h-4 w-4 mr-2" />
                 Export
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-amber-50">
-              <DropdownMenuItem onClick={handleJsonExport} className="cursor-pointer">
-                <Download className="h-4 w-4 mr-2" />
+            <DropdownMenuContent align="end" className="bg-white/80 backdrop-blur-lg border border-white/50 shadow-xl">
+              <DropdownMenuItem onClick={handleJsonExport} className="cursor-pointer hover:bg-[#253551]/10 transition-all duration-300">
+                <Download className="h-4 w-4 mr-2 text-[#253551]" />
                 JSON Format
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleDocumentExport} className="cursor-pointer">
-                <FileText className="h-4 w-4 mr-2" />
+              <DropdownMenuItem onClick={handleDocumentExport} className="cursor-pointer hover:bg-[#253551]/10 transition-all duration-300">
+                <FileText className="h-4 w-4 mr-2 text-[#253551]" />
                 Document Format
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           
-          <Button onClick={onNewFlow}>
+          <Button 
+            onClick={onNewFlow}
+            className="bg-[#253551] hover:bg-[#253551]/90 text-white shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-blue-300/30"
+          >
             <Sparkles className="h-4 w-4 mr-0 sm:mr-2" />
             <span className="hidden sm:inline">New Flow</span>
           </Button>
@@ -272,7 +269,7 @@ export default function Navbar({ hasContent, onNewFlow, automationSteps }: Navba
           <Button 
             variant="secondary"
             onClick={handleContactClick}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300 border border-emerald-500 border-opacity-50 px-6 py-2"
+            className="bg-blue-500 hover:bg-blue-600 text-white shadow-lg hover:shadow-blue-300/30 transform hover:scale-105 transition-all duration-300 border border-blue-400/50 px-6 py-2"
           >
             <MessageSquare className="h-4 w-4 mr-2" />
             Contact Us

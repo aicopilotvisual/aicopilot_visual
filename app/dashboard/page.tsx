@@ -42,25 +42,43 @@ export default function DashboardPage() {
         toast({
           title: "New workflow created",
           description: "Your previous workflow has been cleared.",
-          className:"bg-amber-50"
+          className: "bg-blue-50"
         });
       }
     } else {
       toast({
         title: "New workflow created",
         description: "Start by describing your automation idea in the chat.",
-        className:"bg-amber-50"
+        className: "bg-blue-50"
       });
     }
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-slate-950 dark:to-blue-950">
+    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-white dark:from-[#253551] dark:to-blue-900">
       {/* Animated gradient background */}
-      <div className="absolute inset-0 bg-[url('/subtle-pattern.png')] opacity-10 z-0"></div>
+      <div className="absolute inset-0 bg-[url('/subtle-pattern.png')] opacity-5 z-0"></div>
       
-      {/* Glass morphism container */}
-      <div className="min-h-screen backdrop-blur-sm bg-background/70 relative z-10 flex flex-col">
+      {/* Moving particles effect */}
+      <div className="absolute inset-0 overflow-hidden z-0">
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute rounded-full bg-blue-200/20 dark:bg-blue-400/10"
+            style={{
+              width: `${Math.random() * 10 + 5}px`,
+              height: `${Math.random() * 10 + 5}px`,
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animation: `float ${Math.random() * 30 + 20}s linear infinite`,
+              animationDelay: `${Math.random() * 30}s`,
+            }}
+          ></div>
+        ))}
+      </div>
+      
+      {/* Glass morphism container with subtle motion */}
+      <div className="min-h-screen backdrop-blur-lg bg-white/30 dark:bg-[#253551]/30 relative z-10 flex flex-col transition-all duration-700">
         <Navbar
           hasContent={automationSteps.length > 0}
           onNewFlow={handleNewFlow}
@@ -75,9 +93,10 @@ export default function DashboardPage() {
             max-w-7xl mx-auto w-full
             relative z-10
           `}>
-            {/* Decorative elements */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full filter blur-3xl -z-10 animate-pulse"></div>
-            <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/5 rounded-full filter blur-3xl -z-10 animate-pulse" style={{animationDelay: '2s'}}></div>
+            {/* Decorative elements - glowing orbs */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-300/20 dark:bg-blue-400/10 rounded-full filter blur-3xl -z-10 animate-pulse"></div>
+            <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#253551]/10 rounded-full filter blur-3xl -z-10 animate-pulse" style={{animationDelay: '2s'}}></div>
+            <div className="absolute top-1/2 left-1/4 w-48 h-48 bg-blue-200/10 rounded-full filter blur-2xl -z-10 animate-pulse" style={{animationDelay: '4s'}}></div>
             
             {/* AI Chat panel */}
             <div className={`
@@ -102,8 +121,35 @@ export default function DashboardPage() {
         </div>
       </div>
       
-      {/* Texture overlay */}
-      <div className="texture opacity-5"></div>
+      {/* Subtle water ripple effect */}
+      <div className="fixed inset-0 pointer-events-none z-0 opacity-10">
+        <div className="absolute inset-0 bg-gradient-radial from-blue-200/20 to-transparent animate-ping" style={{animationDuration: '15s'}}></div>
+      </div>
+      
+      {/* Style to support animations */}
+      <style jsx global>{`
+        @keyframes float {
+          0% {
+            transform: translateY(0) translateX(0);
+          }
+          25% {
+            transform: translateY(-20px) translateX(10px);
+          }
+          50% {
+            transform: translateY(0) translateX(20px);
+          }
+          75% {
+            transform: translateY(20px) translateX(10px);
+          }
+          100% {
+            transform: translateY(0) translateX(0);
+          }
+        }
+        
+        .bg-gradient-radial {
+          background: radial-gradient(circle, var(--tw-gradient-from) 0%, var(--tw-gradient-to) 70%);
+        }
+      `}</style>
       
       <Toaster />
     </main>
