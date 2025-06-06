@@ -24,9 +24,9 @@ export default function Navbar({ hasContent, onNewFlow, automationSteps }: Navba
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
 
-  const handleContactClick = () => {
-    window.open("", "_blank");
-  };
+  // const handleContactClick = () => {
+  //   window.open("", "_blank");
+  // };
 
   const handleShareClick = () => {
     if (!hasContent) {
@@ -268,7 +268,7 @@ export default function Navbar({ hasContent, onNewFlow, automationSteps }: Navba
 
           <Button 
             variant="secondary"
-            onClick={handleContactClick}
+            // onClick={handleContactClick}
             className="bg-blue-500 hover:bg-blue-600 text-white shadow-lg hover:shadow-blue-300/30 transform hover:scale-105 transition-all duration-300 border border-blue-400/50 px-6 py-2"
           >
             <MessageSquare className="h-4 w-4 mr-2" />
