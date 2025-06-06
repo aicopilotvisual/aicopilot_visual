@@ -25,7 +25,7 @@ export default function Navbar({ hasContent, onNewFlow, automationSteps }: Navba
   const { toast } = useToast();
 
   const handleContactClick = () => {
-    window.open("https://tally.so/r/3jzXG1", "_blank");
+    window.open("", "_blank");
   };
 
   const handleShareClick = () => {
@@ -42,7 +42,7 @@ export default function Navbar({ hasContent, onNewFlow, automationSteps }: Navba
     
     if (navigator.share) {
       navigator.share({
-        title: 'Mechevo Copilot Workflow',
+        title: 'Copilot Workflow',
         text: 'Check out this automation workflow I created!',
         url: shareUrl,
       })
@@ -211,7 +211,7 @@ export default function Navbar({ hasContent, onNewFlow, automationSteps }: Navba
             <Bot className="h-8 w-8 text-[#253551] animate-pulse" />
           </div>
           <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#253551] to-blue-400">
-            Mechevo Copilot
+            AI Copilot
           </h1>
         </div>
         <div className="flex items-center space-x-2 md:space-x-4">

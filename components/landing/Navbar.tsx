@@ -45,7 +45,7 @@ export default function Navbar() {
             <Bot className="h-6 w-6 text-[#253551]" />
           </div>
           <h1 className="text-2xl font-bold text-[#253551] transition-all duration-300 group-hover:tracking-wide">
-            Mechevo Copilot
+            AI Copilot
           </h1>
         </div>
         <div className="flex items-center">

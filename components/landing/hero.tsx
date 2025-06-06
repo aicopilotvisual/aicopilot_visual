@@ -36,7 +36,7 @@ export default function Hero({ onGetStarted }: HeroProps) {
           Transform complex processes into clear, actionable steps.
         </p>
         <div className="flex flex-col sm:flex-row gap-4">
-          <Link href="https://mechevo.io" target="_blank" rel="noopener noreferrer">
+          <Link href="https://lokicreatesai.me" target="_blank" rel="noopener noreferrer">
             <Button 
               size="lg" 
               variant="outline"

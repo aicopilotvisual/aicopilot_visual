@@ -38,23 +38,6 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
-  icons: {
-    icon: [
-      { url: "./mechevo_logo.png" },
-      { url: "./mechevo_logo.png", sizes: "16x16", type: "image/png" },
-      { url: "./mechevo_logo.png", sizes: "32x32", type: "image/png" },
-    ],
-    apple: [
-      { url: "./mechevo_logo.png", sizes: "180x180" }
-    ],
-    other: [
-      {
-        rel: "mask-icon",
-        url: "./mechevo_logo.png",
-        color: "#5bbad5",
-      },
-    ],
-  },
   category: "technology",
 };
 
@@ -69,7 +52,6 @@ export default function RootLayout({
         <head>
           <meta name="theme-color" content="#ffffff" />
           <meta name="msapplication-TileColor" content="#5bbad5" />
-          <link rel="icon" href="./mechevo_logo.png" sizes="any" />
         </head>
         <body className={`${nunito.variable} ${ptSans.variable} antialiased relative`} suppressHydrationWarning>
           <div className="texture"/>
